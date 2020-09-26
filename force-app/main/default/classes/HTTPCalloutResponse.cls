@@ -13,17 +13,10 @@ public with sharing class HTTPCalloutResponse {
         set { body = value; }
     }
 
-    // Use in Caching algorithm
-    public Datetime timeStamp {
-        get { return timeStamp; }
-        set { timeStamp = value; }
-    }
-
     public HTTPCalloutResponse(Integer statusCode, String status, String body) {
         this.statusCode = statusCode;
         this.status = status;
         this.body = body;
-        this.timeStamp = datetime.now();
     }
 
 }

@@ -246,17 +246,8 @@ public with sharing class HTTPCalloutService {
                 if (orgPart.contains(hash)) {
                     HTTPCalloutResponse cachedResponse = (HTTPCalloutResponse) orgPart.get(hash);
                     if (cachedResponse != null) {
-                        System.debug('Cached Timestamp: ' + cachedResponse.timeStamp.addSeconds(cacheRetentionPeriod));
-                        System.debug('Now: ' + datetime.now());
-                        if (cachedResponse.timeStamp.addSeconds(cacheRetentionPeriod) > datetime.now()) {
-                            System.Debug('Getting from Cache');
-                            return cachedResponse;
-                        }
-                        else {
-                            System.Debug('Cache Expired');
-                            orgPart.remove(hash);
-                        }
-                        
+                        System.Debug('Getting from Cache');
+                        return cachedResponse;
                     }
                 }
             }
@@ -271,8 +262,8 @@ public with sharing class HTTPCalloutService {
 
             HTTPCalloutResponse response = new HTTPCalloutResponse (rsp.getStatusCode(), rsp.getStatus(), rsp.getBody());
 
-            if (cacheEnabled) {
-                orgPart.put(hash, response);
+            if (cacheEnabled && cacheRetentionPeriod > 0) {
+                orgPart.put(hash, response, cacheRetentionPeriod);
             }
             return (response);
         }
