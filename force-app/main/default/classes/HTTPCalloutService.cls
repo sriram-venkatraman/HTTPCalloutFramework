@@ -16,6 +16,8 @@ public with sharing class HTTPCalloutService {
     private String clientCertificate;
     private String requestBody;
     private List<Integer> validStatusCodes;
+    private Boolean cacheEnabled;
+    private Integer cacheRetentionPeriod;
 
     public HTTPCalloutService(String serviceLabel,
                               Map<String, String> dynamicHTTPHeaders,
@@ -78,7 +80,9 @@ public with sharing class HTTPCalloutService {
                             Static_Headers__c,
                             Time_Out_in_milliseconds__c,
                             User_Name__c,
-                            Password__c
+                            Password__c,
+                            Enable_Caching__c,
+                            Cache_Retention_in_Seconds__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     Supported_Environments__c = 'prod'];
@@ -98,7 +102,9 @@ public with sharing class HTTPCalloutService {
                             Static_Headers__c,
                             Time_Out_in_milliseconds__c,
                             User_Name__c,
-                            Password__c
+                            Password__c,
+                            Enable_Caching__c,
+                            Cache_Retention_in_Seconds__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envLike1 OR 
@@ -140,7 +146,9 @@ public with sharing class HTTPCalloutService {
                             Static_Headers__c,
                             Time_Out_in_milliseconds__c,
                             User_Name__c,
-                            Password__c
+                            Password__c,
+                            Enable_Caching__c,
+                            Cache_Retention_in_Seconds__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envMockLike1 OR 
@@ -165,38 +173,40 @@ public with sharing class HTTPCalloutService {
         }
         
         System.debug(h);
-        namedCredential = h[0].Named_Credentials_Name__c;
-        endPointUrl = h[0].Endpoint_URL__c + serviceParameter;
+        this.namedCredential = h[0].Named_Credentials_Name__c;
+        this.endPointUrl = h[0].Endpoint_URL__c + serviceParameter;
 
         if (namedCredential != null) {
-            endPointUrl = 'callout:' + namedCredential + serviceParameter;
+            this.endPointUrl = 'callout:' + namedCredential + serviceParameter;
         }
 
-        httpMethod = h[0].HTTP_Method__c;
-        mockResponseClass = h[0].Mock_Response_Class__c;
-        timeOut = h[0].Time_Out_in_milliseconds__c;
-        clientId = h[0].Client_Id__c;
-        consumerSecret = h[0].Consumer_Secret__c;
-        refreshToken = h[0].Refresh_Token__c;
-        userId = h[0].User_Name__c;
-        password = h[0].Password__c;
-        clientCertificate = h[0].Client_Certificate_Name__c;
+        this.httpMethod = h[0].HTTP_Method__c;
+        this.mockResponseClass = h[0].Mock_Response_Class__c;
+        this.timeOut = h[0].Time_Out_in_milliseconds__c;
+        this.clientId = h[0].Client_Id__c;
+        this.consumerSecret = h[0].Consumer_Secret__c;
+        this.refreshToken = h[0].Refresh_Token__c;
+        this.userId = h[0].User_Name__c;
+        this.password = h[0].Password__c;
+        this.clientCertificate = h[0].Client_Certificate_Name__c;
+        this.cacheEnabled = h[0].Enable_Caching__c;
+        this.cacheRetentionPeriod = h[0].Cache_Retention_in_Seconds__c.intValue();
 
         List<String> keyValue;
-        httpHeaders = new Map<String,String>();
+        this.httpHeaders = new Map<String,String>();
         if (h[0].Static_Headers__c != null) {
             for (String sh : h[0].Static_Headers__c.split('\n')) {
                 keyValue = sh.split(':');
                 if (keyValue.size() != 2) {
                     throw new HTTPCalloutService.ServiceException('Error! Bad Static Header found in Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + keyValue);
                 }
-                httpHeaders.put(keyValue[0], keyValue[1]);
+                this.httpHeaders.put(keyValue[0], keyValue[1]);
             }
         }
         if (dynamicHTTPHeaders != null) {
-            httpHeaders.putAll(dynamicHTTPHeaders);
+            this.httpHeaders.putAll(dynamicHTTPHeaders);
         }
-        System.debug('HttpHeaders: ' + httpHeaders);
+        System.debug('HttpHeaders: ' + this.httpHeaders);
 
         this.requestBody = requestBody;
     }
@@ -208,16 +218,48 @@ public with sharing class HTTPCalloutService {
             return v.getResponse();
         }
 
+        String keyToHash = '';
         try {
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endPointUrl);
+            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += endPointUrl;
             req.setMethod(httpMethod);
+            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += httpMethod;
 
             for (String key : httpHeaders.keySet()){
                 req.setHeader(key, httpHeaders.get(key));
+                if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += key+httpHeaders.get(key);
             }
             req.setBody(requestBody);
+            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += requestBody;
+
             if (timeOut != null) req.setTimeout(timeOut.intValue());
+
+            Cache.OrgPartition orgPart = Cache.Org.getPartition('local.HTTPCalloutCache1');
+            Blob targetBlob;
+            String hash;
+            if (cacheEnabled && cacheRetentionPeriod > 0) {
+                targetBlob = Blob.valueOf(keyToHash);
+                hash = EncodingUtil.convertToHex(Crypto.generateDigest('MD5', targetBlob));
+                System.Debug('keyToHash Length:' + keyToHash.length() + ' keyToHash: ' + keyToHash);
+                System.Debug('Hash Length:' + hash.length() + ' hash: ' + hash);
+                if (orgPart.contains(hash)) {
+                    HTTPCalloutResponse cachedResponse = (HTTPCalloutResponse) orgPart.get(hash);
+                    if (cachedResponse != null) {
+                        System.debug('Cached Timestamp: ' + cachedResponse.timeStamp.addSeconds(cacheRetentionPeriod));
+                        System.debug('Now: ' + datetime.now());
+                        if (cachedResponse.timeStamp.addSeconds(cacheRetentionPeriod) > datetime.now()) {
+                            System.Debug('Getting from Cache');
+                            return cachedResponse;
+                        }
+                        else {
+                            System.Debug('Cache Expired');
+                            orgPart.remove(hash);
+                        }
+                        
+                    }
+                }
+            }
 
             Http httpClient = new Http();
             HttpResponse rsp = httpClient.send(req);
@@ -227,10 +269,15 @@ public with sharing class HTTPCalloutService {
                                                                 'Status: ' + rsp.getStatusCode() + '-' + rsp.getStatus());
             }
 
-            return (new HTTPCalloutResponse (rsp.getStatusCode(), rsp.getStatus(), rsp.getBody()));
+            HTTPCalloutResponse response = new HTTPCalloutResponse (rsp.getStatusCode(), rsp.getStatus(), rsp.getBody());
+
+            if (cacheEnabled) {
+                orgPart.put(hash, response);
+            }
+            return (response);
         }
         catch(Exception ex) {
-            throw new HTTPCalloutService.ServiceException(ex.getMessage());
+            throw new HTTPCalloutService.ServiceException(ex.getMessage() + '\nStack Trace: ' + ex.getStackTraceString());
         } 
     }
 

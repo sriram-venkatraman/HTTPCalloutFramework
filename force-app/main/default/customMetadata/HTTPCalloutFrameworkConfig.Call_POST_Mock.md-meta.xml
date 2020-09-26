@@ -3,6 +3,10 @@
     <label>Call POST</label>
     <protected>false</protected>
     <values>
+        <field>Cache_Retention_in_Seconds__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Client_Certificate_Name__c</field>
         <value xsi:nil="true"/>
     </values>
@@ -13,6 +17,10 @@
     <values>
         <field>Consumer_Secret__c</field>
         <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Enable_Caching__c</field>
+        <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
         <field>Endpoint_URL__c</field>
