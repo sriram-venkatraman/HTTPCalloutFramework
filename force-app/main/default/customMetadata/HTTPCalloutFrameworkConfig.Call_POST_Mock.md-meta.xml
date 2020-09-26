@@ -40,11 +40,11 @@
     </values>
     <values>
         <field>Static_Headers__c</field>
-        <value xsi:type="xsd:string">Content-Type:application/json;</value>
+        <value xsi:type="xsd:string">Content-Type:application/json</value>
     </values>
     <values>
         <field>Supported_Environments__c</field>
-        <value xsi:type="xsd:string">mock;</value>
+        <value xsi:type="xsd:string">mock</value>
     </values>
     <values>
         <field>Time_Out_in_milliseconds__c</field>

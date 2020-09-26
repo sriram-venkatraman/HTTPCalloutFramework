@@ -3,6 +3,8 @@
     <fullName>Supported_Environments__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Multiple Sandboxes name separated by comma. For e.g. 
+dev1,archpoc,default</inlineHelpText>
     <label>Supported Environments</label>
     <length>255</length>
     <required>true</required>

@@ -3,6 +3,7 @@
     <fullName>Mock_Response_Class__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>If Mock Class mentioned, http call will not be made. Ensure the mock call implements HTTPCalloutStub</inlineHelpText>
     <label>Mock Response Class</label>
     <length>100</length>
     <required>false</required>

@@ -84,8 +84,9 @@ public with sharing class HTTPCalloutService {
                     AND     Supported_Environments__c = 'prod'];
             }
             else {
-                String envLike1 = '%;' + this.environmentType + ';%';
-                String envLike2 = this.environmentType + ';%';
+                String envLike1 = '%,' + this.environmentType + ',%';
+                String envLike2 = this.environmentType + ',%';
+                String envLike3 = '%,' + this.environmentType;
                 h = [SELECT Client_Certificate_Name__c,
                             Client_Id__c,
                             Consumer_Secret__c,
@@ -101,7 +102,9 @@ public with sharing class HTTPCalloutService {
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envLike1 OR 
-                            Supported_Environments__c LIKE :envLike2)];                
+                             Supported_Environments__c LIKE :envLike2 OR
+                             Supported_Environments__c LIKE :envLike3 OR
+                             Supported_Environments__c LIKE :this.environmentType)];                
             }
         }
         catch(Exception ex) {
@@ -118,10 +121,12 @@ public with sharing class HTTPCalloutService {
                 throw new HTTPCalloutService.ServiceException('Error! No configuration found for Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType );
             }
 
-            String envMockLike1 = '%;mock;%';
-            String envMockLike2 = 'mock;%';
-            String envDefaultLike1 = '%;default;%';
-            String envDefaultLike2 = 'default;%';
+            String envMockLike1 = '%,mock,%';
+            String envMockLike2 = 'mock,%';
+            String envMockLike3 = '%,mock';
+            String envDefaultLike1 = '%,default,%';
+            String envDefaultLike2 = 'default,%';
+            String envDefaultLike3 = '%,default';
 
             try {
                 h = [SELECT Client_Certificate_Name__c,
@@ -140,8 +145,12 @@ public with sharing class HTTPCalloutService {
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envMockLike1 OR 
                             Supported_Environments__c LIKE :envMockLike2 OR 
+                            Supported_Environments__c LIKE :envMockLike3 OR 
+                            Supported_Environments__c LIKE 'mock' OR 
+                            Supported_Environments__c LIKE 'default' OR 
                             Supported_Environments__c LIKE :envDefaultLike1 OR
-                            Supported_Environments__c LIKE :envDefaultLike2)];
+                            Supported_Environments__c LIKE :envDefaultLike2 OR
+                            Supported_Environments__c LIKE :envDefaultLike3)];
             }
             catch(Exception ex) {
                 throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
