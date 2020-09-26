@@ -49,7 +49,12 @@ public with sharing class HTTPCalloutService {
                             List<Integer> validStatusCodes) {
         this.serviceLabel = serviceLabel;
         String myDomainUrl = System.Url.getOrgDomainUrl().toExternalForm();
-        this.environmentType = myDomainUrl.substringAfter('--').substringBefore('.');
+        if (myDomainUrl.indexOf('--') > 0) {
+            this.environmentType = myDomainUrl.substringAfter('--').substringBefore('.');
+        }
+        else {
+            this.environmentType = 'prod';
+        }
 
         System.debug('Environment: ' + this.environmentType);
 
@@ -57,25 +62,47 @@ public with sharing class HTTPCalloutService {
 
         List<HTTPCalloutFrameworkConfig__mdt> h = new List<HTTPCalloutFrameworkConfig__mdt>();
 
-        String envLike = '%' + environmentType + ';%';
-        String envMockLike = '%mock;%';
-        String envDefaultLike = '%default;%';
         try {
-            h = [SELECT Client_Certificate_Name__c,
-                        Client_Id__c,
-                        Consumer_Secret__c,
-                        Endpoint_URL__c,
-                        HTTP_Method__c,
-                        Mock_Response_Class__c,
-                        Named_Credentials_Name__c,
-                        Refresh_Token__c,
-                        Static_Headers__c,
-                        Time_Out_in_milliseconds__c,
-                        User_Name__c,
-                        Password__c
-                FROM     HTTPCalloutFrameworkConfig__mdt
-                WHERE   MasterLabel = :serviceLabel
-                AND     Supported_Environments__c LIKE :envLike];
+            /* Production needs to have a separate unique configuration and can't be combined with
+            ** sandbox configuration to ensure there is clear distinction.
+            */
+            if (this.environmentType == 'prod') {
+                h = [SELECT Client_Certificate_Name__c,
+                            Client_Id__c,
+                            Consumer_Secret__c,
+                            Endpoint_URL__c,
+                            HTTP_Method__c,
+                            Mock_Response_Class__c,
+                            Named_Credentials_Name__c,
+                            Refresh_Token__c,
+                            Static_Headers__c,
+                            Time_Out_in_milliseconds__c,
+                            User_Name__c,
+                            Password__c
+                    FROM     HTTPCalloutFrameworkConfig__mdt
+                    WHERE   MasterLabel = :serviceLabel
+                    AND     Supported_Environments__c = 'prod'];
+            }
+            else {
+                String envLike1 = '%;' + this.environmentType + ';%';
+                String envLike2 = this.environmentType + ';%';
+                h = [SELECT Client_Certificate_Name__c,
+                            Client_Id__c,
+                            Consumer_Secret__c,
+                            Endpoint_URL__c,
+                            HTTP_Method__c,
+                            Mock_Response_Class__c,
+                            Named_Credentials_Name__c,
+                            Refresh_Token__c,
+                            Static_Headers__c,
+                            Time_Out_in_milliseconds__c,
+                            User_Name__c,
+                            Password__c
+                    FROM     HTTPCalloutFrameworkConfig__mdt
+                    WHERE   MasterLabel = :serviceLabel
+                    AND     (Supported_Environments__c LIKE :envLike1 OR 
+                            Supported_Environments__c LIKE :envLike2)];                
+            }
         }
         catch(Exception ex) {
             throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
@@ -87,6 +114,15 @@ public with sharing class HTTPCalloutService {
         if (h.size() == 1) System.debug('Found a real config');
 
         if (h.size() == 0) {
+            if (this.environmentType == 'prod') {
+                throw new HTTPCalloutService.ServiceException('Error! No configuration found for Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType );
+            }
+
+            String envMockLike1 = '%;mock;%';
+            String envMockLike2 = 'mock;%';
+            String envDefaultLike1 = '%;default;%';
+            String envDefaultLike2 = 'default;%';
+
             try {
                 h = [SELECT Client_Certificate_Name__c,
                             Client_Id__c,
@@ -102,8 +138,10 @@ public with sharing class HTTPCalloutService {
                             Password__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
-                    AND     (Supported_Environments__c LIKE :envMockLike OR
-                             Supported_Environments__c LIKE :envDefaultLike) ];
+                    AND     (Supported_Environments__c LIKE :envMockLike1 OR 
+                            Supported_Environments__c LIKE :envMockLike2 OR 
+                            Supported_Environments__c LIKE :envDefaultLike1 OR
+                            Supported_Environments__c LIKE :envDefaultLike2)];
             }
             catch(Exception ex) {
                 throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
@@ -138,7 +176,7 @@ public with sharing class HTTPCalloutService {
         List<String> keyValue;
         httpHeaders = new Map<String,String>();
         if (h[0].Static_Headers__c != null) {
-            for (String sh : h[0].Static_Headers__c.split(';')) {
+            for (String sh : h[0].Static_Headers__c.split('\n')) {
                 keyValue = sh.split(':');
                 if (keyValue.size() != 2) {
                     throw new HTTPCalloutService.ServiceException('Error! Bad Static Header found in Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + keyValue);
