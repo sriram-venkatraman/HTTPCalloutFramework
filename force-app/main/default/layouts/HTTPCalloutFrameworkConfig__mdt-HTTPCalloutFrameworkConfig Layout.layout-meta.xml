@@ -130,11 +130,19 @@
                 <behavior>Edit</behavior>
                 <field>Enable_Caching__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Cache_Retention_in_Seconds__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Cache_Retention_in_Seconds__c</field>
+                <field>Platform_Cache_Partition_Name__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Org_or_Session_Partition__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>

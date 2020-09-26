@@ -18,6 +18,11 @@ public with sharing class HTTPCalloutService {
     private List<Integer> validStatusCodes;
     private Boolean cacheEnabled;
     private Integer cacheRetentionPeriod;
+    private String orgOrSession;
+    private String cachePartition;
+    private Cache.OrgPartition orgPart;
+    private Cache.SessionPartition sessionPart;
+
 
     public HTTPCalloutService(String serviceLabel,
                               Map<String, String> dynamicHTTPHeaders,
@@ -82,7 +87,9 @@ public with sharing class HTTPCalloutService {
                             User_Name__c,
                             Password__c,
                             Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c
+                            Cache_Retention_in_Seconds__c,
+                            Org_or_Session_Partition__c,
+                            Platform_Cache_Partition_Name__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     Supported_Environments__c = 'prod'];
@@ -104,7 +111,9 @@ public with sharing class HTTPCalloutService {
                             User_Name__c,
                             Password__c,
                             Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c
+                            Cache_Retention_in_Seconds__c,
+                            Org_or_Session_Partition__c,
+                            Platform_Cache_Partition_Name__c
                     FROM     HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envLike1 OR 
@@ -148,8 +157,10 @@ public with sharing class HTTPCalloutService {
                             User_Name__c,
                             Password__c,
                             Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c
-                    FROM     HTTPCalloutFrameworkConfig__mdt
+                            Cache_Retention_in_Seconds__c,
+                            Org_or_Session_Partition__c,
+                            Platform_Cache_Partition_Name__c
+                    FROM    HTTPCalloutFrameworkConfig__mdt
                     WHERE   MasterLabel = :serviceLabel
                     AND     (Supported_Environments__c LIKE :envMockLike1 OR 
                             Supported_Environments__c LIKE :envMockLike2 OR 
@@ -191,6 +202,8 @@ public with sharing class HTTPCalloutService {
         this.clientCertificate = h[0].Client_Certificate_Name__c;
         this.cacheEnabled = h[0].Enable_Caching__c;
         this.cacheRetentionPeriod = h[0].Cache_Retention_in_Seconds__c.intValue();
+        this.orgOrSession = h[0].Org_or_Session_Partition__c;
+        this.cachePartition = h[0].Platform_Cache_Partition_Name__c;
 
         List<String> keyValue;
         this.httpHeaders = new Map<String,String>();
@@ -209,6 +222,12 @@ public with sharing class HTTPCalloutService {
         System.debug('HttpHeaders: ' + this.httpHeaders);
 
         this.requestBody = requestBody;
+
+        if (this.orgOrSession == 'Org') 
+            orgPart = Cache.Org.getPartition(this.cachePartition);
+        else
+            sessionPart = Cache.Session.getPartition(this.cachePartition);
+
     }
 
     public HTTPCalloutResponse callOut() {
@@ -222,29 +241,32 @@ public with sharing class HTTPCalloutService {
         try {
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endPointUrl);
-            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += endPointUrl;
             req.setMethod(httpMethod);
-            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += httpMethod;
 
             for (String key : httpHeaders.keySet()){
                 req.setHeader(key, httpHeaders.get(key));
-                if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += key+httpHeaders.get(key);
             }
             req.setBody(requestBody);
-            if (cacheEnabled && cacheRetentionPeriod > 0) keyToHash += requestBody;
 
             if (timeOut != null) req.setTimeout(timeOut.intValue());
 
-            Cache.OrgPartition orgPart = Cache.Org.getPartition('local.HTTPCalloutCache1');
             Blob targetBlob;
             String hash;
             if (cacheEnabled && cacheRetentionPeriod > 0) {
+                keyToHash = endPointUrl + httpMethod;
+                for (String key : httpHeaders.keySet()){
+                    keyToHash += key+httpHeaders.get(key);
+                }
+                keyToHash += requestBody;
+
                 targetBlob = Blob.valueOf(keyToHash);
                 hash = EncodingUtil.convertToHex(Crypto.generateDigest('MD5', targetBlob));
+
                 System.Debug('keyToHash Length:' + keyToHash.length() + ' keyToHash: ' + keyToHash);
                 System.Debug('Hash Length:' + hash.length() + ' hash: ' + hash);
-                if (orgPart.contains(hash)) {
-                    HTTPCalloutResponse cachedResponse = (HTTPCalloutResponse) orgPart.get(hash);
+
+                if (orgOrSession == 'Org' ? orgPart.contains(hash) : sessionPart.contains(hash)) {
+                    HTTPCalloutResponse cachedResponse = (HTTPCalloutResponse) (orgOrSession == 'Org' ? orgPart.get(hash) : sessionPart.get(hash));
                     if (cachedResponse != null) {
                         System.Debug('Getting from Cache');
                         return cachedResponse;
@@ -262,8 +284,23 @@ public with sharing class HTTPCalloutService {
 
             HTTPCalloutResponse response = new HTTPCalloutResponse (rsp.getStatusCode(), rsp.getStatus(), rsp.getBody());
 
-            if (cacheEnabled && cacheRetentionPeriod > 0) {
-                orgPart.put(hash, response, cacheRetentionPeriod);
+            if (cacheEnabled) {
+                if (cacheRetentionPeriod > 0) {
+                    if (orgOrSession == 'Org')  {
+                        orgPart.put(hash, response, cacheRetentionPeriod);
+                    }
+                    else {
+                        sessionPart.put(hash, response, cacheRetentionPeriod);
+                    }
+                }
+                else {
+                    if (orgOrSession == 'Org')  {
+                        orgPart.put(hash, response);
+                    }
+                    else {
+                        sessionPart.put(hash, response);
+                    }
+                }
             }
             return (response);
         }

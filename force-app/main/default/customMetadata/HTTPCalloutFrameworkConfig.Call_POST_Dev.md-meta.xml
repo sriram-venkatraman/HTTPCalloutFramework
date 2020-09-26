@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>Cache_Retention_in_Seconds__c</field>
-        <value xsi:type="xsd:double">20.0</value>
+        <value xsi:type="xsd:double">300.0</value>
     </values>
     <values>
         <field>Client_Certificate_Name__c</field>
@@ -39,8 +39,16 @@
         <value xsi:type="xsd:string">Test_NC</value>
     </values>
     <values>
+        <field>Org_or_Session_Partition__c</field>
+        <value xsi:type="xsd:string">Org</value>
+    </values>
+    <values>
         <field>Password__c</field>
         <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Platform_Cache_Partition_Name__c</field>
+        <value xsi:type="xsd:string">local.HTTPCalloutCache1</value>
     </values>
     <values>
         <field>Refresh_Token__c</field>

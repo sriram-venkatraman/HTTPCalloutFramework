@@ -39,7 +39,15 @@
         <value xsi:type="xsd:string">Test_NC</value>
     </values>
     <values>
+        <field>Org_or_Session_Partition__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Password__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Platform_Cache_Partition_Name__c</field>
         <value xsi:nil="true"/>
     </values>
     <values>

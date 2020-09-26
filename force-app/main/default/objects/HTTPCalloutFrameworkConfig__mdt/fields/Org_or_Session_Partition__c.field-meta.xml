@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Org_or_Session_Partition__c</fullName>
+    <defaultValue>&quot;Org&quot;</defaultValue>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Select if this Cache is in Org or SessionPartition</inlineHelpText>
+    <label>Org or Session Partition</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Org</fullName>
+                <default>true</default>
+                <label>Org</label>
+            </value>
+            <value>
+                <fullName>Session</fullName>
+                <default>false</default>
+                <label>Session</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
