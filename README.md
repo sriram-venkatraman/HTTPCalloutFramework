@@ -1,7 +1,7 @@
 # HTTP Callout Framework
 *Note: Still tyding up with test classes and documentation. Functionality seems to work reasonably well although I haven't done extensive test*
 
-This framework uses a dependency injection pattern to streamline Apex HTTP Callouts across sandbox environments. Fremework includes -
+This framework uses a dependency injection pattern to streamline Apex HTTP Callouts across sandbox environments. Framework includes -
 * Caching support using platform caching to improve throughput
 * Stubbed http responses for sandbox environments that do not need/have real integration endpoints to support.
 
