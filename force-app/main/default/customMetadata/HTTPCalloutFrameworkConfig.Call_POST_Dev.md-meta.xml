@@ -24,7 +24,7 @@
     </values>
     <values>
         <field>Endpoint_URL__c</field>
-        <value xsi:type="xsd:string">https://postman-echo.com</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>HTTP_Method__c</field>

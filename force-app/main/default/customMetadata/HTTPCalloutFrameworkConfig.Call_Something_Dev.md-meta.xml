@@ -36,7 +36,7 @@
     </values>
     <values>
         <field>Named_Credentials_Name__c</field>
-        <value xsi:type="xsd:string">Test_NC</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Org_or_Session_Partition__c</field>
