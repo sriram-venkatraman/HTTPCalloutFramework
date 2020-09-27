@@ -240,24 +240,24 @@ public with sharing class HTTPCalloutService {
         String keyToHash = '';
         try {
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(endPointUrl);
-            req.setMethod(httpMethod);
+            req.setEndpoint(this.endPointUrl);
+            req.setMethod(this.httpMethod);
 
-            for (String key : httpHeaders.keySet()){
-                req.setHeader(key, httpHeaders.get(key));
+            for (String key : this.httpHeaders.keySet()){
+                req.setHeader(key, this.httpHeaders.get(key));
             }
             req.setBody(requestBody);
 
-            if (timeOut != null) req.setTimeout(timeOut.intValue());
+            if (this.timeOut != null) req.setTimeout(this.timeOut.intValue());
 
             Blob targetBlob;
             String hash;
-            if (cacheEnabled && cacheRetentionPeriod > 0) {
-                keyToHash = endPointUrl + httpMethod;
-                for (String key : httpHeaders.keySet()){
-                    keyToHash += key+httpHeaders.get(key);
+            if (this.cacheEnabled && this.cacheRetentionPeriod > 0) {
+                keyToHash = this.endPointUrl + this.httpMethod;
+                for (String key : this.httpHeaders.keySet()){
+                    keyToHash += key + this.httpHeaders.get(key);
                 }
-                keyToHash += requestBody;
+                keyToHash += this.requestBody;
 
                 targetBlob = Blob.valueOf(keyToHash);
                 hash = EncodingUtil.convertToHex(Crypto.generateDigest('MD5', targetBlob));
@@ -265,7 +265,7 @@ public with sharing class HTTPCalloutService {
                 System.Debug('keyToHash Length:' + keyToHash.length() + ' keyToHash: ' + keyToHash);
                 System.Debug('Hash Length:' + hash.length() + ' hash: ' + hash);
 
-                if (orgOrSession == 'Org' ? orgPart.contains(hash) : sessionPart.contains(hash)) {
+                if (this.orgOrSession == 'Org' ? orgPart.contains(hash) : sessionPart.contains(hash)) {
                     HTTPCalloutResponse cachedResponse = (HTTPCalloutResponse) (orgOrSession == 'Org' ? orgPart.get(hash) : sessionPart.get(hash));
                     if (cachedResponse != null) {
                         System.Debug('Getting from Cache');
@@ -284,17 +284,17 @@ public with sharing class HTTPCalloutService {
 
             HTTPCalloutResponse response = new HTTPCalloutResponse (rsp.getStatusCode(), rsp.getStatus(), rsp.getBody());
 
-            if (cacheEnabled) {
-                if (cacheRetentionPeriod > 0) {
-                    if (orgOrSession == 'Org')  {
-                        orgPart.put(hash, response, cacheRetentionPeriod);
+            if (this.cacheEnabled) {
+                if (this.cacheRetentionPeriod > 0) {
+                    if (this.orgOrSession == 'Org')  {
+                        orgPart.put(hash, response, this.cacheRetentionPeriod);
                     }
                     else {
-                        sessionPart.put(hash, response, cacheRetentionPeriod);
+                        sessionPart.put(hash, response, this.cacheRetentionPeriod);
                     }
                 }
                 else {
-                    if (orgOrSession == 'Org')  {
+                    if (this.orgOrSession == 'Org')  {
                         orgPart.put(hash, response);
                     }
                     else {
