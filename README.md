@@ -1,10 +1,11 @@
 # HTTP Callout Framework
-__Note: Still tyding up with test classes and documentation. Functionality seems to work reasonably well although I haven't done extensive test__
+*Note: Still tyding up with test classes and documentation. Functionality seems to work reasonably well although I haven't done extensive test*
+
 This framework uses a dependency injection pattern to streamline Apex HTTP Callouts across sandbox environments. Fremework includes -
 * Caching support using platform caching to improve throughput
 * Stubbed http responses for sandbox environments that do not need/have real integration endpoints to support.
 
-Dependency injection is done thru' custom metadata type called *HTTPCalloutFrameworkConfig* and the main service class *HTTPCalloutService* uses __System.Url.getOrgDomainUrl().toExternalForm()__ to intercept the sandbox name and to get the appropriate Config setup from the custom metadata type. Also the service class mandates that *prod* is isolated from non-prod configuration to ensure no potential overlaps. This way Callouts are made only to appropriate environment specific endpoints with greater isolation for Production endpoints.
+Dependency injection is done thru' custom metadata type called __HTTPCalloutFrameworkConfig__ and the main service class __HTTPCalloutService__ uses *System.Url.getOrgDomainUrl().toExternalForm()* to intercept the sandbox name and to get the appropriate Config setup from the custom metadata type. Also the service class mandates that __prod__ is isolated from non-prod configuration to ensure no potential overlaps. This way Callouts are made only to appropriate environment specific endpoints with greater isolation for Production endpoints.
 
 This framework supports both static http headers & url parameters via configuration setup. Dynamic headers and parameters are supported through the service class.
 
