@@ -56,8 +56,8 @@
     </values>
     <values>
         <field>Static_Headers__c</field>
-        <value xsi:type="xsd:string">Content-Type:application/json
-x-header:something</value>
+        <value xsi:type="xsd:string">Content-Type:application/json; characterset=UTF-8
+x-frame:df ret</value>
     </values>
     <values>
         <field>Supported_Environments__c</field>

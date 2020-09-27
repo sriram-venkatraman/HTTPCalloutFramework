@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Validate_Comma_Separated</fullName>
+    <active>true</active>
+    <errorConditionFormula>NOT(REGEX( Supported_Environments__c, &quot;^[a-z0-9]+(,[a-z0-9]+)*$&quot;))</errorConditionFormula>
+    <errorDisplayField>Supported_Environments__c</errorDisplayField>
+    <errorMessage>Ensure comma separated lower case alphanumeric values. No spaces allowed. No need for comma at the end.</errorMessage>
+</ValidationRule>

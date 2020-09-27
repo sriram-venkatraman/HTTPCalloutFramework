@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Validate_Static_HTTP_Header</fullName>
+    <active>true</active>
+    <errorConditionFormula>NOT(REGEX(Static_Headers__c, &quot;^[a-zA-Z0-9_\\s\\-\\;\\/\\.\\=\\,]+:[a-zA-Z0-9_\\s\\-\\;\\/\\.\\=\\,]+(\n[a-zA-Z0-9_\\s\\-\\;\\/\\.\\=\\,]+:[a-zA-Z0-9_\\s\\-\\;\\/\\.\\=\\,]+)*$&quot;)) &amp;&amp; NOT(ISBLANK(Static_Headers__c)) &amp;&amp; NOT(ISNULL(Static_Headers__c))</errorConditionFormula>
+    <errorDisplayField>Static_Headers__c</errorDisplayField>
+    <errorMessage>Ensure HTTP header follows the following pattern (presence of : and newline are validate. Words on either side of : can contain alphanumeric _ ; . space / = comma)
+Content-Type:something
+x-frame:something else</errorMessage>
+</ValidationRule>

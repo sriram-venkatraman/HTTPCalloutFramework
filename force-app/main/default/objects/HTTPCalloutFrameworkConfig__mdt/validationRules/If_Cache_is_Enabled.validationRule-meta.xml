@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>If_Cache_is_Enabled</fullName>
+    <active>true</active>
+    <description>If Cache is enabled ensure all required fields are captured</description>
+    <errorConditionFormula>Enable_Caching__c &amp;&amp; (ISBLANK( Platform_Cache_Partition_Name__c ) || ISNULL( Platform_Cache_Partition_Name__c ))</errorConditionFormula>
+    <errorDisplayField>Platform_Cache_Partition_Name__c</errorDisplayField>
+    <errorMessage>If Caching is enabled, please provide the the Platform Cache name (for e.g. local.partition1). Ensure to set if it is Org or Session Cache</errorMessage>
+</ValidationRule>
