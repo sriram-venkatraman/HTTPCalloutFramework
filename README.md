@@ -30,7 +30,7 @@ This framework supports both static http headers & url parameters via configurat
 HTTPCalloutService hcs = new HTTPCalloutService('Call POST', 
                                                 new Map<String, String>(),
                                                 '/post?parm1=Venkatraman',
-                                                'Sriram is expected to be sent back as part of response body'
+                                                'This is expected to be sent back as part of response body'
                                             );
 System.Debug(hcs.callOut());
 ```
