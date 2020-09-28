@@ -35,7 +35,6 @@ HTTPCalloutService hcs = new HTTPCalloutService('Call POST',
 System.Debug(hcs.callOut());
 ```
 
-
 ## Important
 * If caching is required, required Platform Cache (Org or Session) should be created and the specified in the Custom Metadata Config
 * At this time this framework relies only on Named Credentials to ensure credentials are secured. Future enhancements could include leveraging custom auth mechanisms.
