@@ -26,12 +26,14 @@ This framework supports both static http headers & url parameters via configurat
 ## Sample Callout
 ![Sample Configuration with Named Credential](/assets/images/HTTPCalloutServiceCMDTSample.png)
 ![Sample Configuration with Mock Class](/assets/images/HTTPCalloutServiceCMDTSample2.png)
-    HTTPCalloutService hcs = new HTTPCalloutService('Call POST', 
-                                                    new Map<String, String>(),
-                                                    '/post?parm1=Venkatraman',
-                                                    'Sriram is expected to be sent back as part of response body'
-                                                );
-    System.Debug(hcs.callOut());
+```
+HTTPCalloutService hcs = new HTTPCalloutService('Call POST', 
+                                                new Map<String, String>(),
+                                                '/post?parm1=Venkatraman',
+                                                'Sriram is expected to be sent back as part of response body'
+                                            );
+System.Debug(hcs.callOut());
+```
 
 
 ## Important
