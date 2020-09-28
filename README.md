@@ -15,7 +15,7 @@ This framework supports both static http headers & url parameters via configurat
 * Abililty to tag multiple sandboxes to one environment configuration 
 * Forced Production configuration isolation.
 * Auth dependent on Named Credentials only at this point.
-* No Auth endpoint urls are supported via config (*if you dare!!*)
+* No Auth endpoint urls are supported via config
 * Caching support for Http Responses. Request parameters & body are MD5 hashed to store responses in Platform Cache. 
 * Cache retentions are configurable for each callout & environment. Size of cache depends on what is available to the partition. *Give it a try and procure more if it improves your throughput.*
 * Ability to mock http responses using a stubbed class that implements HTTPCalloutStub interface.
