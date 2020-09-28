@@ -24,6 +24,7 @@ This framework supports both static http headers & url parameters via configurat
 *To be implemented: Unified callout framework, take away any auth overhead from calling processes* 
 
 ## Sample Callout
+![Sample Named Credential](/assets/images/HTTPCalloutServiceNCSample.png)
 ![Sample Configuration with Named Credential](/assets/images/HTTPCalloutServiceCMDTSample.png)
 ![Sample Configuration with Mock Class](/assets/images/HTTPCalloutServiceCMDTSample2.png)
 ```
