@@ -24,8 +24,8 @@ This framework supports both static http headers & url parameters via configurat
 *To be implemented: Unified callout framework, take away any auth overhead from calling processes* 
 
 ## Sample Callout
-[![Deploy to Salesforce](/assets/images/HTTPCalloutService CMDT Sample.png)]
-[![Deploy to Salesforce](/assets/images/HTTPCalloutService CMDT Sample2.png)]
+![Sample Configuration with Named Credential](/assets/images/HTTPCalloutService CMDT Sample.png)
+![Sample Configuration with Mock Class](/assets/images/HTTPCalloutService CMDT Sample2.png)
     HTTPCalloutService hcs = new HTTPCalloutService('Call POST', 
                                                     new Map<String, String>(),
                                                     '/post?parm1=Venkatraman',
