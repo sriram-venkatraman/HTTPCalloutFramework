@@ -35,6 +35,7 @@ HTTPCalloutService hcs = new HTTPCalloutService('Call POST',
                                             );
 System.Debug(hcs.callOut());
 ```
+![Sample Mock Callout Response](/force-app/main/default/classes/MockSomeCallout.cls)
 
 ## Important
 * If caching is required, required Platform Cache (Org or Session) should be created and the specified in the Custom Metadata Config
