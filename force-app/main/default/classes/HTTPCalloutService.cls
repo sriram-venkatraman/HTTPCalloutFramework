@@ -68,59 +68,39 @@ public with sharing class HTTPCalloutService {
         this.validStatusCodes = validStatusCodes.clone();
 
         List<HTTPCalloutFrameworkConfig__mdt> h = new List<HTTPCalloutFrameworkConfig__mdt>();
+        String configSOQL = 'SELECT  Client_Certificate_Name__c, ' +
+                    '        Client_Id__c, ' +
+                    '        Consumer_Secret__c,'  +
+                    '        Endpoint_URL__c, ' +
+                    '        HTTP_Method__c, ' +
+                    '        Mock_Response_Class__c, ' +
+                    '        Named_Credentials_Name__c, ' +
+                    '        Refresh_Token__c, ' +
+                    '        Static_Headers__c, ' +
+                    '        Time_Out_in_milliseconds__c, ' +
+                    '        User_Name__c, ' +
+                    '        Password__c, ' +
+                    '        Enable_Caching__c, ' +
+                    '        Cache_Retention_in_Seconds__c, ' +
+                    '        Org_or_Session_Partition__c, ' +
+                    '        Platform_Cache_Partition_Name__c ' +
+                    'FROM    HTTPCalloutFrameworkConfig__mdt ' +
+                    'WHERE   MasterLabel = :serviceLabel ';
 
         try {
             /* Production needs to have a separate unique configuration and can't be combined with
             ** sandbox configuration to ensure there is clear distinction.
             */
             if (this.environmentType == 'prod') {
-                h = [SELECT Client_Certificate_Name__c,
-                            Client_Id__c,
-                            Consumer_Secret__c,
-                            Endpoint_URL__c,
-                            HTTP_Method__c,
-                            Mock_Response_Class__c,
-                            Named_Credentials_Name__c,
-                            Refresh_Token__c,
-                            Static_Headers__c,
-                            Time_Out_in_milliseconds__c,
-                            User_Name__c,
-                            Password__c,
-                            Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c,
-                            Org_or_Session_Partition__c,
-                            Platform_Cache_Partition_Name__c
-                    FROM     HTTPCalloutFrameworkConfig__mdt
-                    WHERE   MasterLabel = :serviceLabel
-                    AND     Supported_Environments__c = 'prod'];
+                h = Database.query(configSOQL +
+                                    'AND Supported_Environments__c = :this.environmentType');
             }
             else {
-                String envLike1 = '%,' + this.environmentType + ',%';
-                String envLike2 = this.environmentType + ',%';
-                String envLike3 = '%,' + this.environmentType;
-                h = [SELECT Client_Certificate_Name__c,
-                            Client_Id__c,
-                            Consumer_Secret__c,
-                            Endpoint_URL__c,
-                            HTTP_Method__c,
-                            Mock_Response_Class__c,
-                            Named_Credentials_Name__c,
-                            Refresh_Token__c,
-                            Static_Headers__c,
-                            Time_Out_in_milliseconds__c,
-                            User_Name__c,
-                            Password__c,
-                            Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c,
-                            Org_or_Session_Partition__c,
-                            Platform_Cache_Partition_Name__c
-                    FROM     HTTPCalloutFrameworkConfig__mdt
-                    WHERE   MasterLabel = :serviceLabel
-                    AND     (Supported_Environments__c LIKE :envLike1 OR 
-                             Supported_Environments__c LIKE :envLike2 OR
-                             Supported_Environments__c LIKE :envLike3 OR
-                             Supported_Environments__c LIKE :this.environmentType)];                
-            }
+                h = Database.query(configSOQL +
+                    'AND     (Supported_Environments__c LIKE \'%,' + this.environmentType + ',%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'' + this.environmentType + ',%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'%,' + this.environmentType + '\' OR ' + 
+                    '         Supported_Environments__c LIKE :this.environmentType)');
         }
         catch(Exception ex) {
             throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
@@ -135,41 +115,18 @@ public with sharing class HTTPCalloutService {
             if (this.environmentType == 'prod') {
                 throw new HTTPCalloutService.ServiceException('Error! No configuration found for Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType );
             }
-
-            String envMockLike1 = '%,mock,%';
-            String envMockLike2 = 'mock,%';
-            String envMockLike3 = '%,mock';
-            String envDefaultLike1 = '%,default,%';
-            String envDefaultLike2 = 'default,%';
-            String envDefaultLike3 = '%,default';
-
             try {
-                h = [SELECT Client_Certificate_Name__c,
-                            Client_Id__c,
-                            Consumer_Secret__c,
-                            Endpoint_URL__c,
-                            HTTP_Method__c,
-                            Mock_Response_Class__c,
-                            Named_Credentials_Name__c,
-                            Refresh_Token__c,
-                            Static_Headers__c,
-                            Time_Out_in_milliseconds__c,
-                            User_Name__c,
-                            Password__c,
-                            Enable_Caching__c,
-                            Cache_Retention_in_Seconds__c,
-                            Org_or_Session_Partition__c,
-                            Platform_Cache_Partition_Name__c
-                    FROM    HTTPCalloutFrameworkConfig__mdt
-                    WHERE   MasterLabel = :serviceLabel
-                    AND     (Supported_Environments__c LIKE :envMockLike1 OR 
-                            Supported_Environments__c LIKE :envMockLike2 OR 
-                            Supported_Environments__c LIKE :envMockLike3 OR 
-                            Supported_Environments__c LIKE 'mock' OR 
-                            Supported_Environments__c LIKE 'default' OR 
-                            Supported_Environments__c LIKE :envDefaultLike1 OR
-                            Supported_Environments__c LIKE :envDefaultLike2 OR
-                            Supported_Environments__c LIKE :envDefaultLike3)];
+                h = Database.query(configSOQL +
+                    'AND     (Supported_Environments__c LIKE \'%,mock,%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'mock,%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'%,mock\' OR ' + 
+                    '         Supported_Environments__c LIKE \'mock\' OR ' +
+                    '         Supported_Environments__c LIKE \'%,default,%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'default,%\' OR ' + 
+                    '         Supported_Environments__c LIKE \'%,default\' OR ' + 
+                    '         Supported_Environments__c LIKE \'default\')' 
+                    );
+
             }
             catch(Exception ex) {
                 throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
