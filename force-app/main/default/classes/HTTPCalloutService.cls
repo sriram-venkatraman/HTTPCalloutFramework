@@ -159,7 +159,7 @@ public with sharing class HTTPCalloutService {
         this.password = h[0].Password__c;
         this.clientCertificate = h[0].Client_Certificate_Name__c;
         this.cacheEnabled = h[0].Enable_Caching__c;
-        this.cacheRetentionPeriod = h[0].Cache_Retention_in_Seconds__c.intValue();
+        this.cacheRetentionPeriod = (h[0].Cache_Retention_in_Seconds__c == null ? 0 : h[0].Cache_Retention_in_Seconds__c.intValue());
         this.orgOrSession = h[0].Org_or_Session_Partition__c;
         this.cachePartition = h[0].Platform_Cache_Partition_Name__c;
 
