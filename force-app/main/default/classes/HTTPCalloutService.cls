@@ -181,10 +181,12 @@ public with sharing class HTTPCalloutService {
 
         this.requestBody = requestBody;
 
-        if (this.orgOrSession == 'Org') 
-            orgPart = Cache.Org.getPartition(this.cachePartition);
-        else
-            sessionPart = Cache.Session.getPartition(this.cachePartition);
+        if (this.cacheEnabled) {
+            if (this.orgOrSession == 'Org') 
+                this.orgPart = Cache.Org.getPartition(this.cachePartition);
+            else
+                this.sessionPart = Cache.Session.getPartition(this.cachePartition);
+        }
 
     }
 
