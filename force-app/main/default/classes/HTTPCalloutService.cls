@@ -93,14 +93,15 @@ public with sharing class HTTPCalloutService {
             */
             if (this.environmentType == 'prod') {
                 h = Database.query(configSOQL +
-                                    'AND Supported_Environments__c = :this.environmentType');
+                                    'AND Supported_Environments__c = \'' + this.environmentType + '\'');
             }
             else {
                 h = Database.query(configSOQL +
                     'AND     (Supported_Environments__c LIKE \'%,' + this.environmentType + ',%\' OR ' + 
                     '         Supported_Environments__c LIKE \'' + this.environmentType + ',%\' OR ' + 
                     '         Supported_Environments__c LIKE \'%,' + this.environmentType + '\' OR ' + 
-                    '         Supported_Environments__c LIKE :this.environmentType)');
+                    '         Supported_Environments__c LIKE \'' + this.environmentType + '\')');
+            }
         }
         catch(Exception ex) {
             throw new HTTPCalloutService.ServiceException('Error! Service Label: ' + serviceLabel + ' & Environment Type: ' + environmentType + '\n' + ex.getMessage());
