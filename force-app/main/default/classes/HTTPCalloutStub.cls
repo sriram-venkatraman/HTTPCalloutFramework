@@ -1,3 +1,3 @@
 public interface HTTPCalloutStub {
-    HTTPCalloutResponse getResponse();
+  HTTPCalloutResponse getResponse(Object input);
 }

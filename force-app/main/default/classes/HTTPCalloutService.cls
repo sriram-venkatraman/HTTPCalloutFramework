@@ -24,6 +24,7 @@ public with sharing class HTTPCalloutService {
   private Cache.SessionPartition sessionPart;
   private Map<String, String> dynamicHTTPHeaders;
   private String serviceParameter;
+  private Object mockInput;
 
   public HTTPCalloutService(
     String serviceLabel,
@@ -38,7 +39,8 @@ public with sharing class HTTPCalloutService {
       dynamicHTTPHeaders,
       serviceParameter,
       requestBody,
-      s
+      s,
+      new Object()
     );
   }
 
@@ -47,14 +49,16 @@ public with sharing class HTTPCalloutService {
     Map<String, String> dynamicHTTPHeaders,
     String serviceParameter,
     String requestBody,
-    List<Integer> validStatusCodes
+    List<Integer> validStatusCodes,
+    Object mockInput
   ) {
     initObject(
       serviceLabel,
       dynamicHTTPHeaders,
       serviceParameter,
       requestBody,
-      validStatusCodes
+      validStatusCodes,
+      mockInput
     );
   }
 
@@ -63,7 +67,8 @@ public with sharing class HTTPCalloutService {
     Map<String, String> dynamicHTTPHeaders,
     String serviceParameter,
     String requestBody,
-    List<Integer> validStatusCodes
+    List<Integer> validStatusCodes,
+    Object mockInput
   ) {
     this.serviceLabel = serviceLabel;
     this.dynamicHTTPHeaders = dynamicHTTPHeaders;
@@ -74,6 +79,8 @@ public with sharing class HTTPCalloutService {
     System.debug('Environment: ' + this.environmentType);
 
     this.validStatusCodes = validStatusCodes.clone();
+
+    this.mockInput = mockInput;
 
     this.getConfig();
 
@@ -91,7 +98,7 @@ public with sharing class HTTPCalloutService {
     if (mockResponseClass != null) {
       Type t = Type.forName(mockResponseClass);
       HTTPCalloutStub v = (HTTPCalloutStub) t.newInstance();
-      return v.getResponse();
+      return v.getResponse(this.mockInput);
     }
 
     String keyToHash = '';
