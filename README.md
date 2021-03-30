@@ -1,4 +1,6 @@
-[![Deploy to Salesforce](https://andrewfawcett.files.wordpress.com/2014/09/deploy.png)](https://githubsfdeploy.herokuapp.com/app/githubdeploy/sriram-venkatraman/HTTPCalloutFramework)
+__Deploy to Dev Org/Prod:__ [![Deploy to Salesforce](https://andrewfawcett.files.wordpress.com/2014/09/deploy.png)](https://githubsfdeploy.herokuapp.com/app/githubdeploy/sriram-venkatraman/HTTPCalloutFramework)
+
+__Deploy to Sandbox:__ [![Deploy to Salesforce](https://andrewfawcett.files.wordpress.com/2014/09/deploy.png)](https://githubsfdeploy-sandbox.herokuapp.com/app/githubdeploy/sriram-venkatraman/HTTPCalloutFramework)
 
 # HTTP Callout Framework
 *Note: Still tidying up with test classes and documentation. Functionality seems to work reasonably well although I haven't done extensive test*
