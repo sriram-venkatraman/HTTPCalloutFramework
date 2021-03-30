@@ -1,0 +1,5 @@
+node_modules
+.prettierrc
+.sfdx/tools/apex.db
+package-lock.json
+package.json
