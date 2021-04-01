@@ -40,7 +40,7 @@ public with sharing class HTTPCalloutService {
       serviceParameter,
       requestBody,
       s,
-      new Object()
+      null
     );
   }
 
@@ -119,6 +119,12 @@ public with sharing class HTTPCalloutService {
       // If Cache Enabled, response exists in Cache &  not expired then return the response from Cache.
       Blob targetBlob;
       String hash;
+      System.debug(
+        'Cache: Enabled: ' +
+        this.cacheEnabled +
+        '; Period: ' +
+        this.cacheRetentionPeriod
+      );
       if (this.cacheEnabled && this.cacheRetentionPeriod > 0) {
         // Hash the request to form cache key
         keyToHash = this.endPointUrl + this.httpMethod;
